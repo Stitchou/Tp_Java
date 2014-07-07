@@ -1,0 +1,8 @@
+package geometrie.formes2D;
+
+public class cercle extends ellipse{
+
+	private String libelle;
+	private double l;
+	private double aire;
+}

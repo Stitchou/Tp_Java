@@ -1,0 +1,13 @@
+package geometrie.formes2D;
+
+public class cercle extends ellipse{
+
+	private String libelle;
+	private double rayon;
+	private double aire;
+	public cercle(String libelle, double rayon) {
+		super();
+		this.libelle = libelle;
+		this.rayon = rayon;
+	}
+}

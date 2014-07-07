@@ -1,0 +1,49 @@
+package coursinterface;
+
+import java.awt.*;
+import javax.swing.*;
+
+public class MyUI extends JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	Toolkit tk=Toolkit.getDefaultToolkit();
+	public MyUI()
+	{
+		// listeneur 
+		Ecouteur ec= new Ecouteur();
+		addWindowListener(ec);
+		// taille écran
+		Dimension d = tk.getScreenSize();
+		
+		// test boutton
+		Container ct = getContentPane();
+	    JButton jb = new JButton("OK " );
+	    JButton jb2 = new JButton("OK " );
+	    JButton jb3 = new JButton("OK " );
+	    JButton jb4 = new JButton("OK " );
+	    JButton jb5 = new JButton("OK " );
+	    jb.setBackground(Color.blue);
+	    jb2.setBackground(Color.red);
+	    jb3.setBackground(Color.darkGray);
+	    jb4.setBackground(Color.GREEN);
+	    jb5.setBackground(Color.magenta);
+	    BorderLayout x = new BorderLayout ();
+	    ct.setLayout(x);
+	    ct.add(jb,BorderLayout.NORTH);
+	    ct.add(jb2,BorderLayout.WEST);
+	    ct.add(jb3, BorderLayout.CENTER);
+	    ct.add(jb4, BorderLayout.EAST);
+	    ct.add(jb5, BorderLayout.SOUTH);
+
+		// paramétrage de la fenetre 
+		setTitle("Exemple");
+		setSize(d.width/2,d.height/2);
+		setResizable(true);
+		setLocationRelativeTo(null);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		setVisible(true);		
+	}
+}

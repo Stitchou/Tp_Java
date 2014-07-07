@@ -1,0 +1,8 @@
+package geometrie.formes2D;
+
+public class ellipse extends Geometrie2D{
+
+	private String libelle;
+	private double l;
+	private double aire;
+}

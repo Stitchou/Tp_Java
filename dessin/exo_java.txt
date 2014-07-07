@@ -1,0 +1,227 @@
+#include "sql_request.h"
+#include<QDebug>
+/*******************************************************************************************
+*************************************auth_user**********************************************
+********************************************************************************************
++---------+----------------------+------+-----+---------+----------------+
+| Field   | Type                 | Null | Key | Default | Extra          |
++---------+----------------------+------+-----+---------+----------------+
+| id      | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| cuid    | varchar(8)           | NO   |     | NULL    |                |
+| name    | varchar(20)          | YES  |     | NULL    |                |
+| surname | varchar(20)          | YES  |     | NULL    |                |
+| pwd     | varchar(40)          | NO   |     | NULL    |                |
+| profile | int(1)               | YES  |     | NULL    |                |
+| status  | int(1)               | YES  |     | NULL    |                |
++---------+----------------------+------+-----+---------+----------------+
+******************************************************************************************
+**********************************trace_demand********************************************
+******************************************************************************************
++----------------+----------------------+------+-----+---------+----------------|
+| Field          | Type                 | Null | Key | Default | Extra          |
++----------------+----------------------+------+-----+---------+----------------|
+| id             | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| name           | varchar(20)          | YES  |     | NULL    |                |
+| surname        | varchar(20)          | YES  |     | NULL    |                |
+| category       | varchar(20)          | YES  |     | NULL    |                |
+| date_of_demand | varchar(10)          | YES  |     | NULL    |                |
+| subject        |varchar(200)          | NO   |     | NULL    |                |
++----------------+----------------------+------+-----+---------+----------------|
+
+******************************************************************************************
+**********************************queue_ans***********************************************
+******************************************************************************************
++--------+----------------------+------+-----+---------+----------------+
+| Field  | Type                 | Null | Key | Default | Extra          |
++--------+----------------------+------+-----+---------+----------------+
+| id     | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| answer | varchar(200)         | NO   |     | NULL    |                |
++--------+----------------------+------+-----+---------+----------------+
+
+*******************************************************************************************
+**********************************queue_ques***********************************************
+*******************************************************************************************
++----------+----------------------+------+-----+---------+----------------+
+| Field    | Type                 | Null | Key | Default | Extra          |
++----------+----------------------+------+-----+---------+----------------+
+| id       | smallint(5) unsigned | NO   | PRI | NULL    | auto_increment |
+| question | varchar(200)         | NO   |     | NULL    |                |
++----------+----------------------+------+-----+---------+----------------+
+*******************************************************************************************
+*******************************************************************************************/
+sql_Request::sql_Request()
+{
+
+}
+sql_Request::~sql_Request()
+{
+    delete query;
+    db.close();
+}
+QString sql_Request::setConnection(QString nameOfConnection)
+{
+
+    db = QSqlDatabase::addDatabase("QODBC",nameOfConnection);
+    db.setDatabaseName("db_managing");
+    if(!db.open())
+    {
+        return db.lastError().text();
+    }
+    query= new QSqlQuery(db);
+    return "db's open";
+}
+int sql_Request::getRequestAuthentification(QString CUID, QString password)
+{
+    QString User_ID="";
+    QString User_pwd="";
+
+    if(query->exec("SELECT cuid,pwd FROM auth_user WHERE pwd='"+password+"' AND cuid='"+CUID+"'"))
+    {
+
+        while(query->next())
+        {
+            if(query->value(0).toString()==CUID && query->value(1)==password)
+            {
+                query->finish();
+                return 1;
+            }
+        }
+        query->finish();
+        return -1;
+    }
+    else return -2;
+}
+
+void sql_Request::createNewUser(QString CUID, QString name, QString surname, QString pwd, QString profile)
+{
+    query->prepare("INSERT INTO auth_user (cuid,name,surname,pwd,profile,status) VALUES('"+CUID+"','"+name+"','"+surname+"','"+pwd+"','"+profile+"',0)");
+    query->exec();
+
+}
+
+void sql_Request::resetPassword(QString CUID, QString newPassword)
+{
+    query->prepare("UPDATE auth_user SET pwd='"+newPassword+"' WHERE cuid='"+CUID+"'");
+    query->exec();
+
+}
+void sql_Request::deleteUser(QString CUID)
+{
+    query->prepare("DELETE FROM auth_user WHERE cuid='"+CUID+"'");
+    query->exec();
+}
+QStringList sql_Request::getAllUser()
+{
+    QString User;
+    QStringList Users;
+    query->prepare("SELECT * from auth_user");
+    if(query->exec())
+    {
+        while(query->next())
+        {
+            User = "@CUID:" +query->value(1).toString() +"@name:"+query->value(2).toString() +"@surname:"+query->value(3).toString() +"@profile:" + query->value(5).toString();
+            Users<<User;
+        }
+    }
+    return Users;
+}
+QStringList sql_Request::getMoreInfo(QString CUID)
+{
+    QStringList Info;
+    if(query->exec("SELECT name, surname,profile FROM auth_user WHERE cuid='"+CUID+"'"))
+    {
+        while(query->next())
+        {
+            Info << query->value(0).toString();//name
+            Info << query->value(1).toString();//surname
+            Info << query->value(2).toString();//profile
+        }
+    }
+    return Info;
+}
+void sql_Request::setStatus(QString CUID, bool status)
+{
+    if(status== true)
+        query->exec("UPDATE auth_user SET status=1 WHERE  cuid='"+CUID+"'");
+    else
+        query->exec("UPDATE auth_user SET status=0 WHERE  cuid='"+CUID+"'");
+}
+QStringList sql_Request::getTracingDemand()
+{
+    QStringList tracing_Demand;
+    if(query->exec("SELECT * FROM trace_demand"))
+    {
+        while(query->next()){
+            tracing_Demand <<query->value(1).toString();
+            tracing_Demand <<query->value(2).toString();
+            tracing_Demand <<query->value(3).toString();
+            tracing_Demand <<query->value(4).toString();
+            tracing_Demand <<query->value(5).toString();
+        }
+    }
+    return tracing_Demand;
+}
+void sql_Request::setTracingDemand(QString name, QString surname, QString category, QString subject)
+{
+    QString date_of_demand = QDate::currentDate().toString("dd.MM.yyyy hh:mm");
+    query->exec("INSERT INTO trace_demand (name,surname,category,date_of_demand,subject) VALUES('"+name+"','"+surname+"','"+category+"','"+date_of_demand+"','"+subject+"')");
+}
+void sql_Request::deleteTracingDemand()
+{
+    query->exec("DELETE FROM trace_demand");
+}
+
+void sql_Request::addToQueueBU(QString frame)
+{
+    QString date_of_demand = QDate::currentDate().toString("dd.MM.yyyy");
+    QString time = QTime::currentTime().toString("hh:mm:ss.");
+    qDebug()<< QTime::currentTime().toString("hh-mm-ss.");
+    query->prepare("INSERT INTO queue_ques(date_of_demand,stock_frame) VALUES('"+date_of_demand+"-"+time+"','"+frame +"');");
+    query->exec();
+
+}
+QString sql_Request::getToQueueBU()
+{QString trame ;
+    query->prepare("SELECT * FROM queue_ques LIMIT 0,1;");
+    if(query->exec())
+    {
+        while(query->next())
+        {
+            trame = query->value(2).toString();
+            QString date =query->value(1).toString();
+            trame += "@ticket:" + date;
+            qDebug()<< trame;
+        }
+    }
+    return trame;
+}
+void sql_Request::deleteToQueueBU()
+{    query->prepare("DELETE FROM queue_ques LIMIT 1;");
+     query->exec();
+
+}
+void sql_Request::addToQueueCC(QString frame,QString CUID)
+{
+    query->prepare("INSERT INTO queue_ans(stock_frame,cuid) VALUES ('"+frame+"','"+CUID+"');");
+    query->exec();
+}
+QStringList sql_Request::getToQueueCC(QString CUID)
+{
+    QStringList answer;
+    query->prepare("SELECT stock_frame FROM queue_ans WHERE cuid='"+CUID+"';");
+    if(query->exec())
+    {
+        while(query->next())
+        {
+            answer<< query->value(0).toString();
+        }
+    }
+    return answer;
+}
+void sql_Request::deleteToQueueCC(QString CUID)
+{
+    query->prepare("DELETE FROM queue_ans WHERE cuid='"+CUID+"';");
+    if(query->exec())
+        while(query->next()){}
+}
+

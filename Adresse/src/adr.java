@@ -1,0 +1,64 @@
+
+public class adr 
+{
+
+	public static void main(String [] args)
+	{
+		String mail="adr@esgi.fr";
+		
+		/**
+		 * déclaration de variables
+		 */
+		String part1="";
+		String part2="";
+		String part3="";
+		
+		int i,pos,j;
+		
+		/** 
+		 * traitement question 1
+		 */
+		pos=mail.indexOf("@");
+		
+		for(i=0;i<pos;i++)
+		{
+			part1+=mail.charAt(i);
+		}
+		i=pos+1;
+		
+		pos=mail.indexOf(".");
+		
+		for(;i<pos;i++)
+		{
+			part2+=mail.charAt(i);
+		}
+		
+		i=pos+1;
+		
+		for(;i<mail.length();i++)
+		{
+			part3+=mail.charAt(i);
+		}
+		System.out.println(part1);
+		System.out.println(part2);
+		System.out.println(part3);
+		/**
+		 * Traitement question 2
+		 */
+		part1=part1.toUpperCase();
+		
+		System.out.println(part1+"@"+part2+"."+part3);
+		/**
+		 * Traitement question 3
+		 */
+		i=0;j=0;
+		while ((i=mail.indexOf("a",i))!=-1)
+		{
+			j++;i++;
+		}
+		System.out.println("Nombre de a: "+j);
+		
+	}
+	
+	
+}
